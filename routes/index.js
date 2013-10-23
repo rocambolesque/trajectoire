@@ -1,8 +1,12 @@
-
-/*
- * GET home page.
- */
+var Interest = require('../models/interest.js');
+var User = require('../models/user.js');
 
 exports.index = function(req, res){
-  res.render('index', { title: 'Express' });
+  User.find(function(err, users) {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render('index', { title: users[0].name });
+    }
+  });
 };
