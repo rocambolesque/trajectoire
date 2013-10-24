@@ -6,46 +6,57 @@ var User = require(__dirname + '/../../models/user.js');
 
 var assert = require('assert');
 var should = require('should');
-var fakeUser;
+var testUser;
 
 describe('User', function(){
   beforeEach(function(done){
-    fakeUser = {
-      name    : 'User1'
-    }
-    // this cleans out your database before each test
+    testUser = {name: 'User1'};
+    var interest1 = new Interest({label: "Interest1"});
+    var interest2 = new Interest({label: "Interest2"});
+    interest1.save();
+    interest2.save();
+    testUser.interests = [interest1, interest2];
     User.remove(done);
   });
 
   describe('#save()', function(){
     var user;
-    // you can use beforeEach in each nested describe
     beforeEach(function(done){
-      user = new User(fakeUser);
+      user = new User(testUser);
       done();
     })
 
-    // you are testing for errors when checking for properties
-    // no need for explicit save test
     it('should have name property', function(done){
       user.save(function(err, user){
-        // dont do this: if (err) throw err; - use a test
         should.not.exist(err);
         user.should.have.property('name', 'User1');
         done();
       });
     });
 
-    // now try a negative test
     it('should not save if name is not present', function(done){
       user.name = '';
       user.save(function(err, user){
-        if (err) {
-          throw err;
-        }
+        should.not.exist(err);
         user.should.have.property('name', '');
         done();
       });
     });
+
+    it('should have interests', function(done){
+      user.save(function(err, user){
+        should.not.exist(err);
+        Interest.findById(user.interests[0], function(err, interest){
+          should.not.exist(err);
+          interest.should.have.property('label', 'Interest1');
+          Interest.findById(user.interests[1], function(err, interest){
+            should.not.exist(err);
+            interest.should.have.property('label', 'Interest2');
+            done();
+          });
+        });
+      });
+    });
+
   });
 });
