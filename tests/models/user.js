@@ -21,9 +21,9 @@ after(function(done){
 
 describe('User', function(){
   beforeEach(function(done){
-    testUser = {name: 'User1'};
-    var interest1 = new Interest({label: "Interest1"});
-    var interest2 = new Interest({label: "Interest2"});
+    testUser = {username: 'name', password: 'pass'};
+    var interest1 = new Interest({label: "interest1"});
+    var interest2 = new Interest({label: "interest2"});
     interest1.save();
     interest2.save();
     testUser.interests = [interest1, interest2];
@@ -40,7 +40,8 @@ describe('User', function(){
     it('should have name property', function(done){
       user.save(function(err, user){
         should.not.exist(err);
-        user.should.have.property('name', 'User1');
+        user.should.have.property('username', 'name');
+        user.should.have.property('password', 'pass');
         done();
       });
     });
@@ -50,10 +51,10 @@ describe('User', function(){
         should.not.exist(err);
         Interest.findById(user.interests[0], function(err, interest){
           should.not.exist(err);
-          interest.should.have.property('label', 'Interest1');
+          interest.should.have.property('label', 'interest1');
           Interest.findById(user.interests[1], function(err, interest){
             should.not.exist(err);
-            interest.should.have.property('label', 'Interest2');
+            interest.should.have.property('label', 'interest2');
             done();
           });
         });
