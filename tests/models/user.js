@@ -1,5 +1,8 @@
+var config = require('../config');
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/trajectoire');
+if (mongoose.connection.readyState == 0) {
+  mongoose.connect(config.db.uri);
+}
 
 var Interest = require(__dirname + '/../../models/interest.js');
 var User = require(__dirname + '/../../models/user.js');
@@ -7,6 +10,14 @@ var User = require(__dirname + '/../../models/user.js');
 var assert = require('assert');
 var should = require('should');
 var testUser;
+
+after(function(done){
+  mongoose.connection.db.dropDatabase(function(){
+    mongoose.connection.close(function(){
+      done();
+    });
+  });
+});
 
 describe('User', function(){
   beforeEach(function(done){
@@ -34,15 +45,6 @@ describe('User', function(){
       });
     });
 
-    it('should not save if name is not present', function(done){
-      user.name = '';
-      user.save(function(err, user){
-        should.not.exist(err);
-        user.should.have.property('name', '');
-        done();
-      });
-    });
-
     it('should have interests', function(done){
       user.save(function(err, user){
         should.not.exist(err);
@@ -57,6 +59,5 @@ describe('User', function(){
         });
       });
     });
-
   });
 });
