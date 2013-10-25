@@ -6,7 +6,8 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('./models/user');
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/trajectoire');
+var config = require('./config/config');
+mongoose.connect(config.db.uri);
 
 var app = express();
 
@@ -62,17 +63,34 @@ app.get('/', function(req, res){
   }
 });
 
-app.post('/login', 
-  passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
+app.post('/signin', 
+  passport.authenticate('local', { failureRedirect: '/', failureFlash: true }),
   function(req, res) {
     res.redirect('/');
   }
 );
 
+app.post('/signup', function(req, res) {
+  var user = new User({username: req.body.username, password: req.body.password});
+  user.save(function(err, user){
+    if (err) {
+      res.redirect('/');
+    }
+    req.logIn(user, function(err) {
+      if (err) {
+        return next(err);
+      }
+      return res.redirect('/')
+    })
+  });
+});
+
 // simple route middleware to ensure user is authenticated
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/');
 }
 
 http.createServer(app).listen(app.get('port'), function(){

@@ -1,8 +1,8 @@
 extends layout
 
 block content
-  if user
-    h2 Hello, #{user.username}.
-  else
-    h2 Welcome! Please log in.
-    include login
+  h2 Welcome!
+  h3 Sign in
+  include signin
+  h3 Sign up
+  include signup
