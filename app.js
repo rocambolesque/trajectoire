@@ -5,6 +5,7 @@ var flash = require('connect-flash');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var User = require('./models/user');
+var Interest = require('./models/interest');
 var mongoose = require('mongoose');
 var config = require('./config/config');
 mongoose.connect(config.db.uri);
@@ -57,7 +58,14 @@ passport.use(new LocalStrategy(function(username, password, done) {
 
 app.get('/', function(req, res){
   if (req.isAuthenticated()) {
-    res.render('dashboard', { user: req.user });
+    User.findById(req.user._id)
+    .populate('interests')
+    .exec(function(err, user){
+      if (err) {
+        return next(err);
+      }
+      res.render('dashboard', {user: user});
+    });
   } else {
     res.render('index', { user: req.user });
   }
@@ -82,6 +90,27 @@ app.post('/signup', function(req, res) {
       }
       return res.redirect('/')
     })
+  });
+});
+
+app.post('/interest', function(req, res) {
+  var interest = new Interest({label: req.body.label});
+  interest.save(function(err, interest){
+    if (err) {
+      return next(err);
+    }
+    User.findById(req.user._id, function(err, user){
+      if (err) {
+        return next(err);
+      }
+      user.interests.push(interest);
+      user.save(function(err, user){
+        if (err) {
+          return next(err);
+        }
+        res.redirect('/');
+      });
+    });
   });
 });
 
