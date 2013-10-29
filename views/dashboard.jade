@@ -4,3 +4,6 @@ block content
   p #{user.username}'s dashboard
   include interest/list
   include interest/new
+  div(ng-view)
+  script(src='/angular/angular.js')
+  script(src='/requirejs/require.js', data-main='/js/appBootstrap.js')
